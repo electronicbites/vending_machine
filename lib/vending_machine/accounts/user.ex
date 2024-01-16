@@ -44,6 +44,7 @@ defmodule VendingMachine.Accounts.User do
     |> validate_password(opts)
     |> validate_deposit()
     |> validate_required([:role])
+    |> validate_inclusion(:role, ~w(buyer seller))
   end
 
   defp validate_username(changeset, opts) do

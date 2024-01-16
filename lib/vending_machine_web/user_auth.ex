@@ -19,7 +19,8 @@ defmodule VendingMachineWeb.UserAuth do
   end
 
   def call(%Plug.Conn{params: %{"api_token" => api_token}} = conn, _opts) do
-    if user = Accounts.get_user_by_session_token(api_token) do
+    {:ok, api_token} = Base.url_decode64(api_token, padding: false)
+    if user = Accounts.get_user_by_api_token(api_token) do
       assign(conn, :user, user)
     else
       render_unauthorized(conn)
@@ -82,6 +83,7 @@ defmodule VendingMachineWeb.UserAuth do
     |> put_status(401)
     |> put_view(json: VendingMachineWeb.ErrorJSON)
     |> render(:"401")
+    |> halt()
   end
 
   @doc """

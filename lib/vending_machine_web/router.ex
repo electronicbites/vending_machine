@@ -13,10 +13,11 @@ defmodule VendingMachineWeb.Router do
     pipe_through :api
     post "/login", UserSessionController, :create
     delete "/logout", UserSessionController, :delete
+    resources "/products", ProductController, only: [:show, :index]
   end
 
-  # scope "/api", VendingMachineWeb do
-  #  pipe_through [:browser, :api_auth]
-  #  resources "/products", ProductsController
-  # end
+  scope "/api", VendingMachineWeb do
+    pipe_through [:api, :api_auth]
+    resources "/products", ProductController, except: [:show, :index]
+  end
 end
