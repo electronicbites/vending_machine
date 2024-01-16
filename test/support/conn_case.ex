@@ -35,4 +35,18 @@ defmodule VendingMachineWeb.ConnCase do
     VendingMachine.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
+
+
+  @doc """
+  Logs the given `user` into the `conn`.
+
+  It returns an updated `conn`.
+  """
+  def log_in_user(conn, user) do
+    token = VendingMachine.Accounts.generate_user_api_token(user)
+
+    conn
+    |> Phoenix.ConnTest.init_test_session(%{})
+    |> Plug.Conn.put_session(:api_token, Base.url_encode64(token, padding: false))
+  end
 end

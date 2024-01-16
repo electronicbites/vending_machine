@@ -12,7 +12,7 @@ defmodule VendingMachine.AccountsFixtures do
       username: unique_user_username(),
       password: valid_user_password(),
       deposit: 42,
-      role: "basic"
+      role: "seller"
     })
   end
 
