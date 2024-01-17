@@ -32,19 +32,27 @@ defmodule VendingMachineWeb.ProductController do
     render(conn, :show, product: product)
   end
 
-  def update(conn, %{"id" => id, "product" => product_params}) do
+  def update(conn, %{"id" => id, "product" => product_params, "api_token" => api_token}) do
+    user = UserAuth.fetch_user_by_api_token(api_token)
     product = Selling.get_product!(id)
-
-    with {:ok, %Product{} = product} <- Selling.update_product(product, product_params) do
-      render(conn, :show, product: product)
+    if product.user_id == user.id do
+      with {:ok, %Product{} = product} <- Selling.update_product(product, product_params) do
+        render(conn, :show, product: product)
+      end
+    else
+      UserAuth.render_unauthorized(conn)
     end
   end
 
-  def delete(conn, %{"id" => id}) do
+  def delete(conn, %{"id" => id, "api_token" => api_token}) do
+    user = UserAuth.fetch_user_by_api_token(api_token)
     product = Selling.get_product!(id)
-
-    with {:ok, %Product{}} <- Selling.delete_product(product) do
-      send_resp(conn, :no_content, "")
+    if product.user_id == user.id do
+      with {:ok, %Product{}} <- Selling.delete_product(product) do
+        send_resp(conn, :no_content, "")
+      end
+      else
+      UserAuth.render_unauthorized(conn)
     end
   end
 end

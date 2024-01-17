@@ -19,7 +19,7 @@ defmodule VendingMachineWeb.ProductControllerTest do
   @invalid_attrs %{amount_available: nil, cost: nil, product_name: nil}
 
   setup %{conn: conn} do
-    user = user_fixture()
+    user = user_fixture(role: "seller")
     api_token = user
     |> VendingMachine.Accounts.generate_user_api_token()
     |> Base.url_encode64(padding: false)
@@ -33,7 +33,7 @@ defmodule VendingMachineWeb.ProductControllerTest do
     end
 
     test "lists all products with data", %{conn: conn} do
-      create_product(nil)
+      create_product(%{user: user_fixture(role: "buyer")})
       conn = get(conn, ~p"/api/products")
       data = json_response(conn, 200)["data"]
       assert Enum.fetch!(data, 0)["product_name"]  == "some product_name"
@@ -107,6 +107,15 @@ defmodule VendingMachineWeb.ProductControllerTest do
              } = json_response(conn, 200)["data"]
     end
 
+    test "renders errors user is not the creator of the product", %{conn: conn, product: product} do
+      another_user = user_fixture(role: "seller")
+      another_api_token = another_user
+      |> VendingMachine.Accounts.generate_user_api_token()
+      |> Base.url_encode64(padding: false)
+      conn = put(conn, ~p"/api/products/#{product}", product: @update_attrs, api_token: another_api_token)
+      assert json_response(conn, 401)["errors"] != %{}
+    end
+
     test "renders errors when data is invalid", %{conn: conn, api_token: api_token, product: product} do
       conn = put(conn, ~p"/api/products/#{product}", product: @invalid_attrs, api_token: api_token)
       assert json_response(conn, 422)["errors"] != %{}
@@ -124,10 +133,20 @@ defmodule VendingMachineWeb.ProductControllerTest do
         get(conn, ~p"/api/products/#{product}")
       end
     end
+
+    test "renders errors user is not the creator of the product", %{conn: conn, product: product} do
+      another_user = user_fixture(role: "seller")
+      another_api_token = another_user
+      |> VendingMachine.Accounts.generate_user_api_token()
+      |> Base.url_encode64(padding: false)
+
+      conn = delete(conn, ~p"/api/products/#{product}", api_token: another_api_token)
+      assert json_response(conn, 401)["errors"] != %{}
+    end
   end
 
-  defp create_product(_) do
-    product = product_fixture()
+  defp create_product(%{user: user}) do
+    product = product_fixture(user_id: user.id)
     %{product: product}
   end
 end
