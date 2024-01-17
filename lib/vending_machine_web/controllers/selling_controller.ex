@@ -2,6 +2,7 @@ defmodule VendingMachineWeb.SellingController do
   use VendingMachineWeb, :controller
 
   alias VendingMachine.Accounts
+  alias VendingMachine.Selling
   alias VendingMachineWeb.UserAuth
 
   action_fallback VendingMachineWeb.FallbackController
@@ -14,7 +15,10 @@ defmodule VendingMachineWeb.SellingController do
     render_result_for_deposit(conn, result)
   end
 
-  def buy(conn, %{"_action" => "buy"} = _params) do
+  def buy(conn, %{"api_token" => api_token, "product_id" => product_id, "amount" => amount} = _params) do
+    user = UserAuth.fetch_user_by_api_token(api_token)
+    product = Selling.get_product!(product_id)
+    Accounts.buy(user, product, String.to_integer(amount))
     conn
     |> put_status(200)
     |> json(%{success: true})
@@ -31,5 +35,4 @@ defmodule VendingMachineWeb.SellingController do
     |> put_status(400)
     |> json(%{success: false})
   end
-
 end

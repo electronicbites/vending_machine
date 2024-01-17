@@ -220,6 +220,10 @@ defmodule VendingMachine.Accounts do
 
   def deposit(_, _), do: {:error}
 
+  def buy(%User{role: "buyer"} = user, product, amount) do
+    {:ok, "foo"}
+  end
+
   ## Session
 
   @doc """
