@@ -47,6 +47,12 @@ defmodule VendingMachine.Accounts.User do
     |> validate_inclusion(:role, ~w(buyer seller))
   end
 
+  def deposit_changeset(user, attrs, _opts \\ []) do
+    user
+    |> cast(attrs, [:deposit])
+    |> validate_deposit()
+  end
+
   defp validate_username(changeset, opts) do
     changeset
     |> validate_required([:username])

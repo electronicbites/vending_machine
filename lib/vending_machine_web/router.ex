@@ -19,5 +19,6 @@ defmodule VendingMachineWeb.Router do
   scope "/api", VendingMachineWeb do
     pipe_through [:api, :api_auth]
     resources "/products", ProductController, except: [:show, :index]
+    get "/deposit", SellingController, :deposit
   end
 end

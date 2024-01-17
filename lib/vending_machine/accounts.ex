@@ -8,7 +8,7 @@ defmodule VendingMachine.Accounts do
 
   alias VendingMachine.Accounts.{User, UserToken}
 
-  ## Database getters
+  ## Database getters & more
 
   @doc """
   Returns the list of users.
@@ -210,6 +210,15 @@ defmodule VendingMachine.Accounts do
       {:error, :user, changeset, _} -> {:error, changeset}
     end
   end
+
+  def deposit(%User{role: "buyer"} = user, amount)
+    when amount == 5 or amount == 10 or amount == 20 or amount == 50 or amount == 100 do
+    user
+    |> User.deposit_changeset(%{deposit: user.deposit + amount})
+    |> Repo.update()
+  end
+
+  def deposit(_, _), do: {:error}
 
   ## Session
 
