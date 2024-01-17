@@ -3,6 +3,7 @@ defmodule VendingMachineWeb.ProductController do
 
   alias VendingMachine.Selling
   alias VendingMachine.Selling.Product
+  alias VendingMachineWeb.UserAuth
 
   action_fallback VendingMachineWeb.FallbackController
 
@@ -11,12 +12,18 @@ defmodule VendingMachineWeb.ProductController do
     render(conn, :index, products: products)
   end
 
-  def create(conn, %{"product" => product_params}) do
-    with {:ok, %Product{} = product} <- Selling.create_product(product_params) do
-      conn
-      |> put_status(:created)
-      |> put_resp_header("location", ~p"/api/products/#{product}")
-      |> render(:show, product: product)
+  def create(conn, %{"product" => product_params, "api_token" => api_token}) do
+    user = UserAuth.fetch_user_by_api_token(api_token)
+    if String.equivalent?(user.role, "seller") do
+      product_params = Map.put(product_params, "user_id", user.id)
+      with {:ok, %Product{} = product} <- Selling.create_product(product_params) do
+        conn
+        |> put_status(:created)
+        |> put_resp_header("location", ~p"/api/products/#{product}")
+        |> render(:show, product: product)
+      end
+    else
+      UserAuth.render_unauthorized(conn)
     end
   end
 

@@ -55,6 +55,30 @@ defmodule VendingMachineWeb.ProductControllerTest do
              } = json_response(conn, 200)["data"]
     end
 
+    test "new product gets connected with user who created it", %{conn: conn, api_token: api_token} do
+      conn = post(conn, ~p"/api/products", product: @create_attrs, api_token: api_token)
+      assert %{"id" => id} = json_response(conn, 201)["data"]
+
+      conn = get(conn, ~p"/api/products/#{id}")
+
+      assert %{
+               "id" => ^id,
+               "amount_available" => 42,
+               "cost" => 42,
+               "product_name" => "some product_name"
+             } = json_response(conn, 200)["data"]
+    end
+
+    test "user needs seller role", %{conn: conn} do
+      user = user_fixture(role: "buyer")
+      api_token = user
+      |> VendingMachine.Accounts.generate_user_api_token()
+      |> Base.url_encode64(padding: false)
+
+      conn = post(conn, ~p"/api/products", product: @create_attrs, api_token: api_token)
+      assert json_response(conn, 401)["errors"] != %{}
+    end
+
     test "renders errors when data is invalid", %{conn: conn, api_token: api_token} do
       conn = post(conn, ~p"/api/products", product: @invalid_attrs, api_token: api_token)
       assert json_response(conn, 422)["errors"] != %{}

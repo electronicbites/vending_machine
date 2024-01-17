@@ -2,11 +2,12 @@ defmodule VendingMachine.SellingTest do
   use VendingMachine.DataCase
 
   alias VendingMachine.Selling
+  import VendingMachine.AccountsFixtures
+  import VendingMachine.SellingFixtures
 
   describe "products" do
     alias VendingMachine.Selling.Product
 
-    import VendingMachine.SellingFixtures
 
     @invalid_attrs %{amount_available: nil, cost: nil, product_name: nil}
 
@@ -21,7 +22,7 @@ defmodule VendingMachine.SellingTest do
     end
 
     test "create_product/1 with valid data creates a product" do
-      valid_attrs = %{amount_available: 42, cost: 42, product_name: "some product_name"}
+      valid_attrs = %{amount_available: 42, cost: 42, product_name: "some product_name", user_id: user_fixture().id}
 
       assert {:ok, %Product{} = product} = Selling.create_product(valid_attrs)
       assert product.amount_available == 42

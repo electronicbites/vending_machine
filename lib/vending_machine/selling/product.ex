@@ -6,15 +6,15 @@ defmodule VendingMachine.Selling.Product do
     field :amount_available, :integer
     field :cost, :integer
     field :product_name, :string
-    field :seller_id, :id
 
+    belongs_to :user, VendingMachine.Accounts.User
     timestamps(type: :utc_datetime)
   end
 
   @doc false
   def changeset(product, attrs) do
     product
-    |> cast(attrs, [:amount_available, :cost, :product_name])
-    |> validate_required([:amount_available, :cost, :product_name])
+    |> cast(attrs, [:amount_available, :cost, :product_name, :user_id])
+    |> validate_required([:amount_available, :cost, :product_name, :user_id])
   end
 end
