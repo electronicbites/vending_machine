@@ -9,3 +9,7 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+
+ VendingMachine.Accounts.register_user(%{username: "seller", password: "secret123", deposit: 42, role: "seller"})
+ VendingMachine.Accounts.register_user(%{username: "buyer", password: "secret123", deposit: 42, role: "buyer"})
+x
